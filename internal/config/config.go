@@ -27,7 +27,7 @@ func (c *Config) SetUser(newUserName string) error {
 	// 2. Write the config struct to the json file
 	err := write(*c)
 	if err != nil {
-		return fmt.Errorf("failed to write config struct to json file: %v", err)
+		return fmt.Errorf("failed to write config struct to json file: %v\n", err)
 	}
 
 	return nil
@@ -38,7 +38,7 @@ func (c *Config) SetUser(newUserName string) error {
 func getConfigFilePath() (string, error) {
 	userHome, err := os.UserHomeDir()
 	if err != nil {
-		return "", fmt.Errorf("failed to retrieve home directory: %v", err)
+		return "", fmt.Errorf("failed to retrieve home directory: %v\n", err)
 	}
 
 	configPath := filepath.Join(userHome, configFileName)
@@ -52,19 +52,19 @@ func write(cfg Config) error {
 	// Step 1: Get the file path
 	configPath, err := getConfigFilePath()
 	if err != nil {
-		return fmt.Errorf("could not retrieve config path: %v", err)
+		return fmt.Errorf("could not retrieve config path: %v\n", err)
 	}
 
 	// Step 2: Marshal the struct into JSON
 	jsonData, err := json.Marshal(cfg)
 	if err != nil {
-		return fmt.Errorf("failed to marshal config to JSON: %v", err)
+		return fmt.Errorf("failed to marshal config to JSON: %v\n", err)
 	}
 
 	// Step 3: Write JSON to the file
 	err = os.WriteFile(configPath, jsonData, 0644)
 	if err != nil {
-		return fmt.Errorf("failed to write JSON data to disk: %v", err)
+		return fmt.Errorf("failed to write JSON data to disk: %v\n", err)
 	}
 
 	return nil
@@ -78,21 +78,21 @@ func Read() (Config, error) {
 	// Appends the config file to the full path so we can read it
 	configPath, err := getConfigFilePath()
 	if err != nil {
-		return Config{}, fmt.Errorf("could not retrieve config path: %v", err)
+		return Config{}, fmt.Errorf("could not retrieve config path: %\n", err)
 	}
 
 	// Decode the JSON string into a new Config struct
 	// Open the file, defer its close until the end of the function
 	jsonFile, err := os.Open(configPath)
 	if err != nil {
-		return Config{}, fmt.Errorf("could not open config path: %v", err)
+		return Config{}, fmt.Errorf("could not open config path: %v\n", err)
 	}
 	defer jsonFile.Close()
 
 	// Read the file into a byte slice
 	byteSliceJson, err := io.ReadAll(jsonFile)
 	if err != nil {
-		return Config{}, fmt.Errorf("could not read from json file data: %v", err)
+		return Config{}, fmt.Errorf("could not read from json file data: %v\n", err)
 	}
 
 	// Declare new config struct
@@ -100,7 +100,7 @@ func Read() (Config, error) {
 
 	// Unmarshal the json data into the struct
 	if err := json.Unmarshal(byteSliceJson, &newConfig); err != nil {
-		return Config{}, fmt.Errorf("Error unmarshalling JSON: %v", err)
+		return Config{}, fmt.Errorf("Error unmarshalling JSON: %v\n", err)
 	}
 
 	return newConfig, nil
