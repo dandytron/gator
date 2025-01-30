@@ -30,3 +30,19 @@ FROM feed_follows
 JOIN users ON feed_follows.user_id = users.id
 JOIN feeds ON feed_follows.feed_id = feeds.id
 WHERE users.name = $1;
+
+-- name: UnfollowFeed :one
+
+DELETE FROM feed_follows
+WHERE feed_follows.user_id IN (
+    SELECT id
+    FROM users
+    WHERE users.name = $1
+) AND feed_follows.feed_id IN (
+    SELECT id 
+    FROM feeds
+    WHERE feeds.url = $2
+)
+RETURNING *,
+(SELECT name FROM users WHERE id = feed_follows.user_id) as user_name,
+(SELECT name FROM feeds WHERE id = feed_follows.feed_id) as feed_name;
