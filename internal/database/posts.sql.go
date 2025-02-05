@@ -17,6 +17,7 @@ const createPost = `-- name: CreatePost :one
 
 INSERT INTO posts(id, created_at, updated_at, title, url, description, published_at, feed_id)
 VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+ON CONFLICT (url) DO NOTHING
 RETURNING id, title
 `
 
@@ -54,7 +55,7 @@ func (q *Queries) CreatePost(ctx context.Context, arg CreatePostParams) (CreateP
 
 const getPostsForUser = `-- name: GetPostsForUser :many
 
-SELECT posts.id, posts.title, posts.url, posts.published_at
+SELECT posts.id, feeds.name AS feedname, posts.title, posts.description, posts.url, posts.published_at
 FROM posts
 JOIN feeds on posts.feed_id = feeds.id
 INNER JOIN users on feeds.user_id = users.id
@@ -70,7 +71,9 @@ type GetPostsForUserParams struct {
 
 type GetPostsForUserRow struct {
 	ID          uuid.UUID
+	Feedname    string
 	Title       sql.NullString
+	Description sql.NullString
 	Url         sql.NullString
 	PublishedAt sql.NullTime
 }
@@ -86,7 +89,9 @@ func (q *Queries) GetPostsForUser(ctx context.Context, arg GetPostsForUserParams
 		var i GetPostsForUserRow
 		if err := rows.Scan(
 			&i.ID,
+			&i.Feedname,
 			&i.Title,
+			&i.Description,
 			&i.Url,
 			&i.PublishedAt,
 		); err != nil {
